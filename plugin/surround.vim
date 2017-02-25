@@ -404,6 +404,9 @@ function! s:dosurround(...) " {{{1
   if char == 'r'
     let char = ']'
   endif
+  if char == 'q'
+    let char = s:closestquote()
+  endif
   let newchar = ""
   if a:0 > 1
     let newchar = a:2
@@ -603,6 +606,30 @@ function! s:closematch(str) " {{{1
     return ">"
   else
     return ""
+  endif
+endfunction " }}}1
+
+function! s:closestquote() " {{{1
+  let origline = line('.')
+  let origcol = col('.')
+  exec "norm! va'o"
+  exec "norm! \<Esc>"
+  let singlecol = col('.')
+  if singlecol == origcol && getline('.')[singlecol-1] != "'" || singlecol > origcol
+    let singlecol = -1
+  endif
+  call cursor(origline, origcol)
+  exec "norm! va\"o"
+  exec "norm! \<Esc>"
+  let doublecol = col('.')
+  if doublecol == origcol && getline('.')[doublecol-1] != '"' || doublecol > origcol
+    let doublecol = -1
+  endif
+  call cursor(origline, origcol)
+  if singlecol > doublecol
+    return "'"
+  else
+    return '"'
   endif
 endfunction " }}}1
 
