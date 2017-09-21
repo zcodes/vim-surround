@@ -26,7 +26,7 @@ function! s:inputtarget()
   if c == " "  || c == "\\"
     let c .= s:getchar()
   endif
-  if c =~ "\<Esc>\|\<C-C>\|\0"
+  if c =~ "\<Esc>\\|\<C-C>"
     return ""
   else
     return c
@@ -41,7 +41,7 @@ function! s:inputreplacement()
   if c == " " || c == "\\"
     let c .= s:getchar()
   endif
-  if c =~ "\<Esc>" || c =~ "\<C-C>"
+  if c =~ "\<Esc>\\|\<C-C>"
     return ""
   else
     return c
@@ -127,6 +127,7 @@ function! s:process(string)
   return s
 endfunction
 
+" wrap {string} with {char}
 function! s:wrap(string,char,type,removed,special)
   let keeper = a:string
   let newchar = a:char
@@ -315,6 +316,7 @@ function! s:wrap(string,char,type,removed,special)
   return keeper
 endfunction
 
+" wrap string in the register {reg}
 function! s:wrapreg(reg,char,removed,special)
   let orig = getreg(a:reg)
   let type = substitute(getregtype(a:reg),'\d\+$','','')
@@ -497,6 +499,8 @@ function! s:dosurround(...) " {{{1
     let special = a:0 > 2 ? a:3 : 0
     call s:wrapreg('"',newchar,removed,special)
   endif
+  " put the contents from unanmed register "" before cursor (P) and move
+  " cursor to the first char '`['
   silent exe 'norm! ""'.pcmd.'`['
   if removed =~ '\n' || okeeper =~ '\n' || getreg('"') =~ '\n'
     call s:reindent()
@@ -667,4 +671,4 @@ if !exists("g:surround_no_mappings") || ! g:surround_no_mappings
   endif
 endif
 
-" vim:set ft=vim sw=2 sts=2 et:
+" vim:set ft=vim sw=2 sts=2 et fdm=marker:
